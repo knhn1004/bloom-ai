@@ -7,7 +7,5 @@ wsl
 
 conda activate bloom
 
-# Navigate to the hardwareBackend directory
-cd hardwareBackend
 # Run the main Python script
 python main.py
