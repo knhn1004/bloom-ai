@@ -59,7 +59,7 @@ void loop()
         // ----- Soil Moisture Sensor (Analog Pin A1) -----
         int soilMoistureValue = analogRead(A1); // Read the value from the soil moisture sensor
 
-        // Print all sensor values
+        // Print all values in a single line
         Serial.print(F("Humidity: "));
         Serial.print(humidity);
         Serial.print(F("%, Temp: "));
@@ -75,35 +75,22 @@ void loop()
         Serial.print(F(", Soil Moisture: "));
         Serial.println(soilMoistureValue); // Print all values in a single line and then move to the next line
 
-        // ----- RGB Lighting Logic -----
+      // ----- RGB Lighting Logic -----
         if (soilMoistureValue < 300) {
             // Low soil moisture - set RGB to blue
             setRGB(0, 0, 255);  // Blue indicates the plant needs water
-            Serial.println("Condition: Low soil moisture, setting RGB to Blue.");
-            Serial.print("Soil Moisture Value: ");
-            Serial.println(soilMoistureValue);
         } else if (tempC > 30) {
             // High temperature - set RGB to red
             setRGB(255, 0, 0);  // Red indicates too much heat
-            Serial.println("Condition: High temperature, setting RGB to Red.");
-            Serial.print("Temperature Value: ");
-            Serial.println(tempC);
         } else if (lightValue < 200) {
             // Low light - set RGB to yellow
             setRGB(255, 255, 0);  // Yellow indicates the plant needs more light
-            Serial.println("Condition: Low light, setting RGB to Yellow.");
-            Serial.print("Light Sensor Value: ");
-            Serial.println(lightValue);
         } else if (humidity > 50) {
             // High humidity - set RGB to green
             setRGB(0, 255, 0);  // Green indicates the plant is in optimal condition
-            Serial.println("Condition: High humidity, setting RGB to Green.");
-            Serial.print("Humidity Value: ");
-            Serial.println(humidity);
         } else {
             // Default color - soft purple (relaxation mode)
             setRGB(128, 0, 128);  // Purple for normal or no significant issues
-            Serial.println("Condition: Default, setting RGB to Purple.");
         }
     }
 }
