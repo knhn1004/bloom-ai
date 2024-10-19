@@ -3,6 +3,7 @@
 import {
 	createClient,
 	ListenLiveClient,
+	LiveTranscriptionEvent,
 	LiveTranscriptionEvents,
 } from '@deepgram/sdk';
 import { Groq } from 'groq-sdk';
@@ -20,9 +21,9 @@ export async function processUserInput(input: string) {
 		const completion = await groq.chat.completions.create({
 			messages: [
 				{
-						role: 'system',
-						content:
-							'You are Bloom AI, an assistant specializing in plant care and mindfulness.',
+					role: 'system',
+					content:
+						'You are Bloom AI, an assistant specializing in plant care and mindfulness.',
 				},
 				{ role: 'user', content: input },
 			],
@@ -58,11 +59,14 @@ export async function startTranscription() {
 			console.log('Connection opened.');
 		});
 
-		dgConnection.on(LiveTranscriptionEvents.Transcript, (data: any) => {
-			console.log('Transcript received:', data);
-			// Here you can handle the transcription results
-			// For example, you might want to update the UI or send the transcription to your AI for processing
-		});
+		dgConnection.on(
+			LiveTranscriptionEvents.Transcript,
+			(data: LiveTranscriptionEvent) => {
+				console.log('Transcript received:', data);
+				// Here you can handle the transcription results
+				// For example, you might want to update the UI or send the transcription to your AI for processing
+			}
+		);
 
 		return 'Transcription started';
 	} catch (error) {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -42,7 +42,7 @@ import {
 	Eye,
 	AlertTriangle,
 } from 'lucide-react';
-import { processUserInput } from './actions/ai-actions';
+import { processUserInput } from './actions/groq-chat';
 import {
 	useDeepgram,
 	LiveConnectionState,
@@ -148,14 +148,7 @@ interface Message {
 //}
 
 export default function Dashboard() {
-	const [messages, setMessages] = useState<Message[]>([
-		{
-			role: 'ai',
-			content:
-				"Welcome to Bloom AI. I'm here to assist you with plant care and mindfulness. How can I help you cultivate serenity today?",
-			sentiment: 'Adoration/Joy',
-		},
-	]);
+	const [messages, setMessages] = useState<Message[]>([]);
 
 	const { connection, connectToDeepgram, connectionState } = useDeepgram();
 	const {
@@ -167,6 +160,9 @@ export default function Dashboard() {
 	} = useMicrophone();
 
 	const [isListening, setIsListening] = useState(false);
+
+	const scrollAreaRef = useRef<HTMLDivElement>(null);
+	const messagesEndRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		setupMicrophone();
@@ -189,7 +185,6 @@ export default function Dashboard() {
 
 		const onData = (e: BlobEvent) => {
 			if (e.data.size > 0) {
-				console.log(e.data);
 				connection.send(e.data);
 			}
 		};
@@ -227,6 +222,18 @@ export default function Dashboard() {
 		isListening,
 	]);
 
+	useEffect(() => {
+		// Scroll to the bottom of the chat area when messages change
+		if (scrollAreaRef.current) {
+			const scrollContainer = scrollAreaRef.current.querySelector(
+				'[data-radix-scroll-area-viewport]'
+			);
+			if (scrollContainer) {
+				scrollContainer.scrollTop = scrollContainer.scrollHeight;
+			}
+		}
+	}, [messages]);
+
 	const handleUserInput = async (input: string) => {
 		setMessages(prev => [...prev, { role: 'user', content: input }]);
 		const aiResponse = await processUserInput(input);
@@ -238,33 +245,16 @@ export default function Dashboard() {
 			setIsListening(true);
 			await connectToDeepgram({
 				model: 'nova-2',
+				language: 'en-US',
 				interim_results: true,
 				smart_format: true,
 				filler_words: true,
 				utterance_end_ms: 1000,
 			});
-			setMessages(prev => [
-				...prev,
-				{
-					role: 'ai',
-					content:
-						'Connection established. How can I assist you with your plant care and mindfulness journey today?',
-					sentiment: 'Adoration/Joy',
-				},
-			]);
 		} else {
 			setIsListening(false);
 			connection?.finish();
 			stopMicrophone();
-			setMessages(prev => [
-				...prev,
-				{
-					role: 'ai',
-					content:
-						'Thank you for using Bloom AI. Remember, like a garden, mindfulness grows with daily care. Until next time!',
-					sentiment: 'Amusement',
-				},
-			]);
 		}
 	};
 
@@ -340,38 +330,48 @@ export default function Dashboard() {
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="p-4 sm:p-6">
-						<ScrollArea className="h-[300px] sm:h-[400px] w-full mb-4">
-							{messages.map((msg, index) => {
-								const {
-									icon: SentimentIcon,
-									color,
-									label,
-								} = getSentimentInfo(msg.sentiment);
-								return (
-									<div
-										key={index}
-										className={`mb-4 ${
-											msg.role === 'user' ? 'text-right' : 'text-left'
-										}`}
-									>
+						<ScrollArea
+							className="h-[300px] sm:h-[400px] w-full mb-4"
+							ref={scrollAreaRef}
+						>
+							<div className="pr-4">
+								{' '}
+								{/* Add padding-right to account for scrollbar */}
+								{messages.map((msg, index) => {
+									const {
+										icon: SentimentIcon,
+										color,
+										label,
+									} = getSentimentInfo(msg.sentiment);
+									return (
 										<div
-											className={`inline-block max-w-[80%] sm:max-w-md p-3 sm:p-4 rounded-2xl ${
-												msg.role === 'user'
-													? 'bg-blue-100 text-blue-900'
-													: 'bg-green-100 text-green-900'
+											key={index}
+											className={`mb-4 ${
+												msg.role === 'user' ? 'text-right' : 'text-left'
 											}`}
 										>
-											<p className="text-sm sm:text-base">{msg.content}</p>
-											{msg.sentiment && (
-												<div className="flex items-center mt-2 text-xs">
-													<SentimentIcon className={`w-4 h-4 ${color} mr-1`} />
-													<span>{label}</span>
-												</div>
-											)}
+											<div
+												className={`inline-block max-w-[80%] sm:max-w-md p-3 sm:p-4 rounded-2xl ${
+													msg.role === 'user'
+														? 'bg-blue-100 text-blue-900'
+														: 'bg-green-100 text-green-900'
+												}`}
+											>
+												<p className="text-sm sm:text-base">{msg.content}</p>
+												{msg.sentiment && (
+													<div className="flex items-center mt-2 text-xs">
+														<SentimentIcon
+															className={`w-4 h-4 ${color} mr-1`}
+														/>
+														<span>{label}</span>
+													</div>
+												)}
+											</div>
 										</div>
-									</div>
-								);
-							})}
+									);
+								})}
+								<div ref={messagesEndRef} />
+							</div>
 						</ScrollArea>
 						<div className="flex justify-center">
 							<Button
