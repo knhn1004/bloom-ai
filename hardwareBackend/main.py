@@ -9,7 +9,7 @@ load_dotenv()
 
 # Replace with your ThingSpeak API key from environment variable
 THINGSPEAK_API_KEY = os.getenv("THINGSPEAK_API_KEY")
-
+rateLimit = 30
 # Configure serial port (update port if necessary)
 serial_port = "/dev/ttyACM0"  # Linux
 # serial_port = "COM10"  # Windows
@@ -73,4 +73,4 @@ while True:
             update_thingspeak(humidity, temp_c, temp_f, light, soil_moisture)
 
     # Add a small delay before the next reading
-    time.sleep(15)  # Update every 15 seconds as per ThingSpeak's rate limit
+    time.sleep(rateLimit)  # Update every 15 seconds as per ThingSpeak's rate limit
