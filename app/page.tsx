@@ -191,8 +191,8 @@ export default function Dashboard() {
 
 		const onTranscript = async (data: LiveTranscriptionEvent) => {
 			const transcript = data.channel.alternatives[0].transcript;
-			console.log('transcript', transcript);
 			if (transcript !== '') {
+				console.log('transcript', transcript);
 				await handleUserInput(transcript);
 			}
 		};
