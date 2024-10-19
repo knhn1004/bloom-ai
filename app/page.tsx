@@ -165,10 +165,6 @@ export default function Dashboard() {
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
-		setupMicrophone();
-	}, [setupMicrophone]);
-
-	useEffect(() => {
 		if (microphoneState === MicrophoneState.Ready && isListening) {
 			connectToDeepgram({
 				model: 'nova-2',
@@ -247,15 +243,22 @@ export default function Dashboard() {
 
 	const toggleConnection = async () => {
 		if (!isListening) {
-			setIsListening(true);
-			await connectToDeepgram({
-				model: 'nova-2',
-				language: 'en-US',
-				interim_results: true,
-				smart_format: true,
-				filler_words: true,
-				utterance_end_ms: 1000,
-			});
+			try {
+				setupMicrophone();
+				setIsListening(true);
+				await connectToDeepgram({
+					model: 'nova-2',
+					language: 'en-US',
+					interim_results: true,
+					smart_format: true,
+					filler_words: true,
+					utterance_end_ms: 1000,
+				});
+			} catch (error) {
+				setIsListening(false);
+				connection?.finish();
+				console.error('Error connection microphone', error);
+			}
 		} else {
 			setIsListening(false);
 			connection?.finish();
