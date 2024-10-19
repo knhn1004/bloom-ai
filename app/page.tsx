@@ -22,7 +22,6 @@ import {
 import { processUserInput } from './actions/groq-chat';
 import {
 	useDeepgram,
-	LiveConnectionState,
 	LiveTranscriptionEvents,
 	LiveTranscriptionEvent,
 } from './context/DeepgramContextProvider';
@@ -38,7 +37,7 @@ import type { Message } from './lib/interfaces';
 export default function Dashboard() {
 	const [messages, setMessages] = useState<Message[]>([]);
 
-	const { connection, connectToDeepgram, connectionState } = useDeepgram();
+	const { connection, connectToDeepgram } = useDeepgram();
 	const {
 		setupMicrophone,
 		microphone,
@@ -65,9 +64,9 @@ export default function Dashboard() {
 	}, [microphoneState, connectToDeepgram, isListening]);
 
 	useEffect(() => {
-		if (!microphone || !connection) return;
+		if (!microphone || !connection || !isListening) return;
 
-		const onData = (e: BlobEvent) => {
+		const onData = async (e: BlobEvent) => {
 			if (e.data.size > 0) {
 				connection.send(e.data);
 			}
@@ -86,12 +85,10 @@ export default function Dashboard() {
 			}
 		};
 
-		if (connectionState === LiveConnectionState.OPEN && isListening) {
-			connection.addListener(LiveTranscriptionEvents.Transcript, onTranscript);
-			microphone.addEventListener(MicrophoneEvents.DataAvailable, onData);
-			startMicrophone();
-			console.log('Connection opened and microphone started');
-		}
+		connection.addListener(LiveTranscriptionEvents.Transcript, onTranscript);
+		microphone.addEventListener(MicrophoneEvents.DataAvailable, onData);
+		startMicrophone();
+		console.log('Connection opened and microphone started');
 
 		return () => {
 			connection.removeListener(
@@ -99,19 +96,10 @@ export default function Dashboard() {
 				onTranscript
 			);
 			microphone.removeEventListener(MicrophoneEvents.DataAvailable, onData);
-			if (isListening) {
-				stopMicrophone();
-				console.log('Microphone stopped');
-			}
+			stopMicrophone();
+			console.log('Microphone stopped');
 		};
-	}, [
-		connectionState,
-		connection,
-		microphone,
-		startMicrophone,
-		stopMicrophone,
-		isListening,
-	]);
+	}, [connection, microphone, isListening, startMicrophone, stopMicrophone]);
 
 	useEffect(() => {
 		// Scroll to the bottom of the chat area when messages change
@@ -131,29 +119,36 @@ export default function Dashboard() {
 		setMessages(prev => [...prev, { role: 'ai', ...aiResponse } as Message]);
 	};
 
+	const startConnection = async () => {
+		try {
+			await setupMicrophone();
+			await connectToDeepgram({
+				model: 'nova-2',
+				language: 'en-US',
+				interim_results: true,
+				smart_format: true,
+				filler_words: true,
+				utterance_end_ms: 1000,
+			});
+			setIsListening(true);
+			console.log('Connected to Deepgram');
+		} catch (error) {
+			console.error('Error connecting microphone or services', error);
+		}
+	};
+
+	const stopConnection = () => {
+		setIsListening(false);
+		connection?.finish();
+		stopMicrophone();
+		console.log('Connection finished and microphone stopped');
+	};
+
 	const toggleConnection = async () => {
 		if (!isListening) {
-			try {
-				setupMicrophone();
-				setIsListening(true);
-				await connectToDeepgram({
-					model: 'nova-2',
-					language: 'en-US',
-					interim_results: true,
-					smart_format: true,
-					filler_words: true,
-					utterance_end_ms: 1000,
-				});
-			} catch (error) {
-				setIsListening(false);
-				connection?.finish();
-				console.error('Error connection microphone', error);
-			}
+			await startConnection();
 		} else {
-			setIsListening(false);
-			connection?.finish();
-			stopMicrophone();
-			console.log('Connection finished and microphone stopped');
+			stopConnection();
 		}
 	};
 
