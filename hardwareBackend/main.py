@@ -11,9 +11,8 @@ load_dotenv()
 THINGSPEAK_API_KEY = os.getenv("THINGSPEAK_API_KEY")
 
 # Configure serial port (update port if necessary)
-serial_port = "/dev/ttyACM0" #linux
-# serial_port = "COM10" #windows
-
+serial_port = "/dev/ttyACM0"  # Linux
+# serial_port = "COM10"  # Windows
 
 baud_rate = 9600
 
@@ -70,6 +69,7 @@ while True:
 
         # If data was parsed successfully, send it to ThingSpeak
         if humidity is not None:
+            print(f"Parsed Data: Humidity={humidity}, TempC={temp_c}, TempF={temp_f}, Light={light}, SoilMoisture={soil_moisture}")
             update_thingspeak(humidity, temp_c, temp_f, light, soil_moisture)
 
     # Add a small delay before the next reading
