@@ -1,20 +1,10 @@
 'use server';
 
-import {
-	createClient,
-	ListenLiveClient,
-	LiveTranscriptionEvent,
-	LiveTranscriptionEvents,
-} from '@deepgram/sdk';
 import { Groq } from 'groq-sdk';
 
-const deepgramApiKey = process.env.DEEPGRAM_API_KEY;
 const groqApiKey = process.env.GROQ_API_KEY;
 
-const deepgram = createClient(deepgramApiKey);
 const groq = new Groq({ apiKey: groqApiKey });
-
-let dgConnection: ListenLiveClient | null = null;
 
 export async function processUserInput(input: string) {
 	try {
@@ -46,41 +36,4 @@ export async function processUserInput(input: string) {
 			sentiment: 'negative',
 		};
 	}
-}
-
-export async function startTranscription() {
-	try {
-		dgConnection = deepgram.listen.live({ model: 'nova' });
-		if (!dgConnection) {
-			throw new Error('Failed to create Deepgram connection');
-		}
-
-		dgConnection.on(LiveTranscriptionEvents.Open, () => {
-			console.log('Connection opened.');
-		});
-
-		dgConnection.on(
-			LiveTranscriptionEvents.Transcript,
-			(data: LiveTranscriptionEvent) => {
-				console.log('Transcript received:', data);
-				// Here you can handle the transcription results
-				// For example, you might want to update the UI or send the transcription to your AI for processing
-			}
-		);
-
-		return 'Transcription started';
-	} catch (error) {
-		console.error('Error starting transcription:', error);
-		throw error;
-	}
-}
-
-export async function stopTranscription() {
-	if (dgConnection) {
-		dgConnection.finish();
-		dgConnection = null;
-		console.log('Stopped live transcription');
-		return 'Transcription stopped';
-	}
-	return 'No active transcription to stop';
 }
