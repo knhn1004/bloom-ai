@@ -341,7 +341,14 @@ export default function Dashboard() {
 						>
 							<div className="pr-4">
 								{' '}
-								{/* Add padding-right to account for scrollbar */}
+								{messages.length === 0 && (
+									<div className="flex items-center justify-center mb-4 text-green-500">
+										<Sprout className="w-8 h-8 mr-2" />
+										<div className="text-center">
+											Ask me anything about plant care and mindfulness.
+										</div>
+									</div>
+								)}
 								{messages.map((msg, index) => {
 									const {
 										icon: SentimentIcon,

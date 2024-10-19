@@ -23,7 +23,7 @@ export async function processUserInput(input: string) {
 				{
 					role: 'system',
 					content:
-						'You are Bloom AI, an assistant specializing in plant care and mindfulness.',
+						"You are Bloom AI, an assistant specializing in plant care and mindfulness. You should respond with a short answer to the user's question in a friendly tone.",
 				},
 				{ role: 'user', content: input },
 			],
