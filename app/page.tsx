@@ -189,11 +189,16 @@ export default function Dashboard() {
 			}
 		};
 
+		let lastTranscript = '';
+
 		const onTranscript = async (data: LiveTranscriptionEvent) => {
 			const transcript = data.channel.alternatives[0].transcript;
-			if (transcript !== '') {
-				console.log('transcript', transcript);
-				await handleUserInput(transcript);
+			if (transcript !== '' && data.is_final) {
+				console.log('Final transcript:', transcript);
+				if (transcript !== lastTranscript) {
+					await handleUserInput(transcript);
+					lastTranscript = transcript;
+				}
 			}
 		};
 
