@@ -4,6 +4,7 @@ import cloudinary
 import cloudinary.uploader
 from flask import Flask, render_template, redirect, url_for, request
 from dotenv import load_dotenv
+from camera_utils import capture_image
 load_dotenv()
 
 app = Flask(__name__)
@@ -20,22 +21,6 @@ CAPTURE_FOLDER = 'static/captures'
 
 # Ensure the folder exists
 os.makedirs(CAPTURE_FOLDER, exist_ok=True)
-
-def capture_image():
-    cam = cv2.VideoCapture(0)
-
-    if not cam.isOpened():
-        return None
-
-    ret, frame = cam.read()
-    if ret:
-        image_path = os.path.join(CAPTURE_FOLDER, 'plant_capture.jpg')
-        cv2.imwrite(image_path, frame)
-        cam.release()
-        return image_path
-    else:
-        cam.release()
-        return None
 
 def upload_to_cdn(image_path):
     result = cloudinary.uploader.upload(image_path)
