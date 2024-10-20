@@ -21,8 +21,8 @@ import {
 } from 'lucide-react';
 //import { processUserInput } from './actions/groq-chat';
 
-import { getSentimentInfo, plantMetricsData } from './lib/data';
-import type { Message } from './lib/interfaces';
+import { getSentimentInfo, setupPlantMetricsListener } from './lib/data';
+import type { Message, PlantMetrics } from './lib/interfaces';
 import { toggleDeepgramConnection } from './actions/deepgram-chat';
 import { db } from './firebase.config';
 import { onSnapshot, collection } from 'firebase/firestore';
@@ -33,6 +33,7 @@ export default function Dashboard() {
 	const [isListening, setIsListening] = useState(false);
 	const [chatId, setChatId] = useState('');
 
+	const [plantMetrics, setPlantMetrics] = useState<PlantMetrics[]>([]);
 	const scrollAreaRef = useRef<HTMLDivElement>(null);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -63,6 +64,18 @@ export default function Dashboard() {
 			}
 		}
 	}, [messages]);
+
+	useEffect(() => {
+		const unsubscribe = setupPlantMetricsListener((data) => {
+		  setPlantMetrics(data);
+		});
+	  
+		return () => {
+		  if (unsubscribe) {
+			unsubscribe();
+		  }
+		};
+	  }, []);	
 
 	const toggleConnection = async () => {
 		if (isListening) {
@@ -175,7 +188,9 @@ export default function Dashboard() {
 									<Thermometer className="w-8 h-8 text-blue-500 mr-2" />
 									<div>
 										<p className="text-sm text-blue-700">Temperature</p>
-										<p className="text-2xl font-bold text-blue-900">24°C</p>
+										<p className="text-2xl font-bold text-blue-900">
+											{plantMetrics.length > 0 ? `${plantMetrics[plantMetrics.length - 1].temperature}°C` : 'N/A'}
+										</p>
 									</div>
 								</CardContent>
 							</Card>
@@ -184,7 +199,9 @@ export default function Dashboard() {
 									<Droplet className="w-8 h-8 text-green-500 mr-2" />
 									<div>
 										<p className="text-sm text-green-700">Humidity</p>
-										<p className="text-2xl font-bold text-green-900">60%</p>
+										<p className="text-2xl font-bold text-green-900">
+											{plantMetrics.length > 0 ? `${plantMetrics[plantMetrics.length - 1].humidity}%` : 'N/A'}
+										</p>
 									</div>
 								</CardContent>
 							</Card>
@@ -194,7 +211,7 @@ export default function Dashboard() {
 									<div>
 										<p className="text-sm text-yellow-700">Light Intensity</p>
 										<p className="text-2xl font-bold text-yellow-900">
-											800 lux
+											{plantMetrics.length > 0 ? `${plantMetrics[plantMetrics.length - 1].lightIntensity} lux` : 'N/A'}
 										</p>
 									</div>
 								</CardContent>
@@ -203,14 +220,16 @@ export default function Dashboard() {
 								<CardContent className="p-4 flex items-center">
 									<Sprout className="w-8 h-8 text-purple-500 mr-2" />
 									<div>
-										<p className="text-sm text-purple-700">Growth</p>
-										<p className="text-2xl font-bold text-purple-900">Good</p>
+										<p className="text-sm text-purple-700">Soil Moisture</p>
+										<p className="text-2xl font-bold text-purple-900">
+											{plantMetrics.length > 0 ? `${plantMetrics[plantMetrics.length - 1].soilMoisture}%` : 'N/A'}
+										</p>
 									</div>
 								</CardContent>
 							</Card>
 						</div>
 						<Tabs defaultValue="soilMoisture">
-							<TabsList className="grid w-full grid-cols-3 rounded-xl bg-green-100">
+							<TabsList className="grid w-full grid-cols-4 rounded-xl bg-green-100">
 								<TabsTrigger
 									value="soilMoisture"
 									className="data-[state=active]:bg-green-500 data-[state=active]:text-white"
@@ -218,19 +237,25 @@ export default function Dashboard() {
 									Soil Moisture
 								</TabsTrigger>
 								<TabsTrigger
-									value="waterLevel"
+									value="temperature"
 									className="data-[state=active]:bg-green-500 data-[state=active]:text-white"
 								>
-									Water Level
+									Temperature
 								</TabsTrigger>
 								<TabsTrigger
-									value="wateringEvents"
+									value="humidity"
 									className="data-[state=active]:bg-green-500 data-[state=active]:text-white"
 								>
-									Watering Events
+									Humidity
+								</TabsTrigger>
+								<TabsTrigger
+									value="lightIntensity"
+									className="data-[state=active]:bg-green-500 data-[state=active]:text-white"
+								>
+									Light Intensity
 								</TabsTrigger>
 							</TabsList>
-							{['soilMoisture', 'waterLevel', 'wateringEvents'].map(metric => (
+							{['soilMoisture', 'temperature', 'humidity', 'lightIntensity'].map(metric => (
 								<TabsContent key={metric} value={metric}>
 									<Card className="rounded-xl">
 										<CardContent className="p-0">
@@ -244,7 +269,7 @@ export default function Dashboard() {
 													},
 												}}
 											>
-												<LineChart data={plantMetricsData}>
+												<LineChart data={plantMetrics}>
 													<CartesianGrid strokeDasharray="3 3" />
 													<XAxis dataKey="timestamp" />
 													<YAxis />

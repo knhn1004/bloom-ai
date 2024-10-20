@@ -1,4 +1,3 @@
-
 // TypeScript interfaces
 export interface Message {
 	role: 'user' | 'ai';
@@ -26,9 +25,7 @@ export interface Message {
 export interface PlantMetrics {
 	timestamp: string;
 	soilMoisture: number;
-	waterLevel: number;
 	temperature: number;
 	humidity: number;
 	lightIntensity: number;
-	wateringEvents: number;
 }

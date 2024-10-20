@@ -3,12 +3,13 @@ import time
 from datetime import datetime
 import firebase_admin
 from firebase_admin import credentials, firestore
+import os
 
 cred = credentials.Certificate("serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
-THINKSPEAK_URL = "https://api.thingspeak.com/channels/2703381/feeds.json?results=2"
+THINKSPEAK_URL = os.getenv("IOT_ENDPOINT")
 
 def fetch_data():
     response = requests.get(THINKSPEAK_URL)
@@ -18,26 +19,55 @@ def fetch_data():
         print(f"Error fetching data: {response.status_code}")
         return None
 
+def get_last_processed_entry():
+    last_processed_doc = db.collection('metadata').document('last_processed_entry').get()
+    if last_processed_doc.exists:
+        return last_processed_doc.to_dict().get('entry_id', 0)
+    return 0
+
+def update_last_processed_entry(entry_id):
+    db.collection('metadata').document('last_processed_entry').set({'entry_id': entry_id})
+
 def update_firestore(data):
     if data and 'feeds' in data:
-        latest_feed = data['feeds'][-1]
-        doc_ref = db.collection('iot_data').document(str(latest_feed['entry_id']))
+        last_processed_id = get_last_processed_entry()
+        new_entries = [feed for feed in data['feeds'] if int(feed['entry_id']) > last_processed_id]
         
-        doc = doc_ref.get()
-        if doc.exists:
-            print(f"Entry with id {latest_feed['entry_id']} already exists. Skipping update.")
-            return
-
-        doc_ref.set({
-            'timestamp': datetime.strptime(latest_feed['created_at'], "%Y-%m-%dT%H:%M:%SZ"),
-            'temperature': float(latest_feed['field1']),
-            'humidity': float(latest_feed['field2']),
-            'light_intensity': float(latest_feed['field3']),
-            'soil_moisture': int(latest_feed['field4'])
-        })
-        print(f"Updated Firestore with entry_id: {latest_feed['entry_id']}")
+        for feed in new_entries:
+            doc_ref = db.collection('iot_data').document(str(feed['entry_id']))
+            
+            try:
+                timestamp = datetime.strptime(feed['created_at'], "%Y-%m-%dT%H:%M:%SZ")
+                doc_data = {
+                    'timestamp': timestamp,
+                    'temperature': parse_float(feed['field1']),
+                    'humidity': parse_float(feed['field2']),
+                    'light_intensity': parse_float(feed['field3']),
+                    'soil_moisture': parse_int(feed['field4'])
+                }
+                doc_ref.set(doc_data)
+                print(f"Updated Firestore with entry_id: {feed['entry_id']}")
+            except ValueError as e:
+                print(f"Error parsing data for entry_id {feed['entry_id']}: {str(e)}")
+            except Exception as e:
+                print(f"Error updating Firestore for entry_id {feed['entry_id']}: {str(e)}")
+        
+        if new_entries:
+            update_last_processed_entry(int(new_entries[-1]['entry_id']))
     else:
         print("No data to update")
+
+def parse_float(value):
+    try:
+        return float(value)
+    except ValueError:
+        return None
+
+def parse_int(value):
+    try:
+        return int(value)
+    except ValueError:
+        return None
 
 def main():
     while True:

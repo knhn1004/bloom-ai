@@ -17,6 +17,10 @@ import {
 	AlertTriangle,
 } from 'lucide-react';
 
+import { db } from '../firebase.config';
+import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import type { PlantMetrics } from './interfaces';
+
 export const getSentimentInfo = (sentiment?: string) => {
 	switch (sentiment) {
 		case 'positive':
@@ -76,60 +80,23 @@ export const getSentimentInfo = (sentiment?: string) => {
 	}
 };
 
-// Mock data for plant metrics
-export const plantMetricsData = [
-	{
-		timestamp: '00:00',
-		soilMoisture: 30,
-		waterLevel: 50,
-		temperature: 22,
-		humidity: 60,
-		lightIntensity: 800,
-		wateringEvents: 0,
-	},
-	{
-		timestamp: '04:00',
-		soilMoisture: 28,
-		waterLevel: 48,
-		temperature: 20,
-		humidity: 65,
-		lightIntensity: 0,
-		wateringEvents: 0,
-	},
-	{
-		timestamp: '08:00',
-		soilMoisture: 25,
-		waterLevel: 45,
-		temperature: 23,
-		humidity: 55,
-		lightIntensity: 1200,
-		wateringEvents: 1,
-	},
-	{
-		timestamp: '12:00',
-		soilMoisture: 35,
-		waterLevel: 60,
-		temperature: 26,
-		humidity: 50,
-		lightIntensity: 1500,
-		wateringEvents: 0,
-	},
-	{
-		timestamp: '16:00',
-		soilMoisture: 32,
-		waterLevel: 58,
-		temperature: 25,
-		humidity: 52,
-		lightIntensity: 1000,
-		wateringEvents: 0,
-	},
-	{
-		timestamp: '20:00',
-		soilMoisture: 30,
-		waterLevel: 55,
-		temperature: 24,
-		humidity: 58,
-		lightIntensity: 200,
-		wateringEvents: 1,
-	},
-];
+export const setupPlantMetricsListener = (callback: (data: PlantMetrics[]) => void) => {
+  const plantMetricsRef = collection(db, 'iot_data');
+  const q = query(plantMetricsRef, orderBy('timestamp', 'desc'), limit(24));
+
+  return onSnapshot(q, (querySnapshot) => {
+    const data = querySnapshot.docs.map(doc => {
+      const docData = doc.data();
+      console.log('Raw Firestore data:', docData);
+      return {
+        timestamp: docData.timestamp?.toDate().toLocaleString() || 'N/A',
+        soilMoisture: docData.soilMoisture || docData.soil_moisture || 0,
+        temperature: docData.temperature || 0,
+        humidity: docData.humidity || 0,
+        lightIntensity: docData.lightIntensity || docData.light_intensity || 0,
+      };
+    });
+    console.log('Transformed data:', data);
+    callback(data.reverse());
+  });
+};
