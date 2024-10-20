@@ -12,7 +12,7 @@ Bloom AI is an innovative plant health monitoring system that combines IoT senso
 - **Data Analytics**: Visualize trends and patterns in your plant's health data.
 - **Image Analysis**: Upload plant images for AI-powered health assessment.
 
-![Dashboard Screenshot](path/to/dashboard_screenshot.png)
+![1](https://github.com/user-attachments/assets/bd04b7f5-7c80-4445-a7d2-2a5bc8cadd1d)
 
 ## Technology Stack
 
