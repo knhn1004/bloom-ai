@@ -3,7 +3,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Roboto } from "next/font/google";
 export const viewport: Viewport = {
-  themeColor: "#8FCE00",
+  themeColor: "#FFFFFF",
 };
 // const geistSans = localFont({
 //   src: "./fonts/GeistVF.woff",
