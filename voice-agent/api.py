@@ -1,10 +1,10 @@
-import asyncio
 import subprocess
 import os
 from fastapi import FastAPI, HTTPException, Query
 from dotenv import load_dotenv
 import firebase_admin
 from firebase_admin import credentials, firestore
+from pyngrok import ngrok
 
 cred = credentials.Certificate("service_account.json")
 firebase_admin.initialize_app(cred)
@@ -16,16 +16,22 @@ app = FastAPI()
 
 process = None
 
+ngrok.set_auth_token(os.environ.get("NGROK_AUTH_TOKEN"))
+http_tunnel = ngrok.connect(8000)
+ngrok_url = http_tunnel.public_url
+
 @app.post("/start")
 async def start_voice_agent(chat_id: str = Query(...)):
     global process
+    global ngrok_url
+    print(f"Ngrok URL: {ngrok_url}")
     if process is not None:
         raise HTTPException(status_code=400, detail="Voice agent is already running")
     dg_api_key = os.environ.get("DEEPGRAM_API_KEY")
     if dg_api_key is None:
         raise HTTPException(status_code=500, detail="DEEPGRAM_API_KEY env var not present")
     try:
-        process = subprocess.Popen(["python", "voice_agent.py", "--chat_id", chat_id])
+        process = subprocess.Popen(["python", "voice_agent.py", "--chat_id", chat_id, "--ngrok_url", ngrok_url])
         db.collection('chats').doc(chat_id).update({
             'chat_id': chat_id
         })
@@ -50,6 +56,26 @@ async def stop_voice_agent():
         return {"message": "Voice agent forcefully stopped"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to stop voice agent: {str(e)}")
+
+@app.get("/temperature")
+async def get_temperature():
+    # TODO: get temperature from sensor
+    return {"temperature": 72}
+
+@app.get("/humidity")
+async def get_humidity():
+    # TODO: get humidity from sensor
+    return {"humidity": 40}
+
+@app.get("/light_intensity")
+async def get_light_intensity():
+    # TODO: get light intensity from sensor
+    return {"light_intensity": 1000}
+
+@app.get("/soil_moisture")
+async def get_soil_moisture():
+    # TODO: get soil moisture from sensor
+    return {"soil_moisture": 50}
 
 if __name__ == "__main__":
     import uvicorn

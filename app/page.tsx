@@ -242,14 +242,8 @@ export default function Dashboard() {
 								</CardContent>
 							</Card>
 						</div>
-						<Tabs defaultValue="soilMoisture">
+						<Tabs defaultValue="temperature">
 							<TabsList className="grid w-full grid-cols-4 rounded-xl bg-green-100">
-								<TabsTrigger
-									value="soilMoisture"
-									className="data-[state=active]:bg-green-500 data-[state=active]:text-white"
-								>
-									Soil Moisture
-								</TabsTrigger>
 								<TabsTrigger
 									value="temperature"
 									className="data-[state=active]:bg-green-500 data-[state=active]:text-white"
@@ -262,11 +256,18 @@ export default function Dashboard() {
 								>
 									Humidity
 								</TabsTrigger>
+
 								<TabsTrigger
 									value="lightIntensity"
 									className="data-[state=active]:bg-green-500 data-[state=active]:text-white"
 								>
 									Light Intensity
+								</TabsTrigger>
+								<TabsTrigger
+									value="soilMoisture"
+									className="data-[state=active]:bg-green-500 data-[state=active]:text-white"
+								>
+									Soil Moisture
 								</TabsTrigger>
 							</TabsList>
 							{[

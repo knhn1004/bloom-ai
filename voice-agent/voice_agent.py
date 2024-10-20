@@ -19,12 +19,13 @@ db = firestore.client()
 load_dotenv()
 parser = argparse.ArgumentParser(description="Voice Agent")
 parser.add_argument("--chat_id", type=str, required=True)
+parser.add_argument("--ngrok_url", type=str, required=True)
 args = parser.parse_args()
 
 
 VOICE_AGENT_URL = "wss://agent.deepgram.com/agent"
 PROMPT = "You are a Bloom AI agent. You are a helpful assistant that helps knows about the plant. Responses should be short and direct."
-VOICE = "aura-asteria-en"
+VOICE = "aura-luna-en"
 
 USER_AUDIO_SAMPLE_RATE = 16000
 USER_AUDIO_SECS_PER_CHUNK = 0.05
@@ -48,17 +49,51 @@ SETTINGS = {
     },
     "agent": {
         "listen": {"model": "nova-2"},
-        #"think": {
-        #    "provider": {"type": "open_ai"},
-        #    "model": "gpt-4o-mini",
-        #    "instructions": PROMPT,
-        #},
+        "speak": {"model": VOICE},
         "think": {
             "provider": {"type": "groq"},
             "model": "llama3-70b-8192",
+            #"provider": {"type": "open_ai"},
+            #"model": "gpt-4o-mini",
             "instructions": PROMPT,
+            "functions": [
+                {
+                    "name": "get_plant_humidity",
+                    "description": "Get the current humidity of the plant",
+                    "url": args.ngrok_url + "/humidity",
+                    #"headers": [{"key": "authorization", "value": ""}],
+                    "method": "get",
+                    "parameters": {
+                        #"type": "object",
+                        #"properties": {"item": {"type": "string", "description": ""}},
+                        #"required": ["item"],
+                    },
+                },
+                {
+                    "name": "get_plant_temperature",
+                    "description": "Get the current temperature of the plant",
+                    "url": args.ngrok_url + "/temperature",
+                    "method": "get",
+                    "parameters": {}
+                },
+                {
+                    "name": "get_plant_light_intensity",
+                    "description": "Get the current light intensity of the plant",
+                    "url": args.ngrok_url + "/light_intensity",
+                    "headers": [{"key": "authorization", "value": ""}],
+                    "method": "get",
+                    "parameters": {}
+                },
+                {
+                    "name": "get_plant_soil_moisture",
+                    "description": "Get the current soil moisture of the plant",
+                    "url": args.ngrok_url + "/soil_moisture",
+                    "headers": [{"key": "authorization", "value": ""}],
+                    "method": "get",
+                    "parameters": {}
+                },
+            ],
         },
-        "speak": {"model": VOICE},
     },
 }
 
@@ -125,22 +160,28 @@ async def run():
 
                             if json.loads(message)["type"] == "ConversationText":
                                 conversation_data = json.loads(message)
-                                #chat_ref = db.collection('chats').document(args.chat_id)
-                                #chat_ref.set({
+                                # chat_ref = db.collection('chats').document(args.chat_id)
+                                # chat_ref.set({
                                 #    'messages': firestore.ArrayUnion([{
                                 #        'role': conversation_data['role'],
                                 #        'content': conversation_data['content'],
                                 #    }])
-                                #}, merge=True)
-                                #chat_ref.update({
+                                # }, merge=True)
+                                # chat_ref.update({
                                 #    'last_updated': firestore.SERVER_TIMESTAMP
-                                #})
-                                messages_collection = db.collection('chats').document(args.chat_id).collection('messages')
-                                messages_collection.add({
-                                    'role': conversation_data['role'],
-                                    'content': conversation_data['content'],
-                                    'timestamp': firestore.SERVER_TIMESTAMP
-                                })
+                                # })
+                                messages_collection = (
+                                    db.collection("chats")
+                                    .document(args.chat_id)
+                                    .collection("messages")
+                                )
+                                messages_collection.add(
+                                    {
+                                        "role": conversation_data["role"],
+                                        "content": conversation_data["content"],
+                                        "timestamp": firestore.SERVER_TIMESTAMP,
+                                    }
+                                )
 
                         elif type(message) is bytes:
                             await speaker.play(message)
