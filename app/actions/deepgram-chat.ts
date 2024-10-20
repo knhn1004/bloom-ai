@@ -1,7 +1,6 @@
 'use server';
 
 const VOICE_AI_ENDPOINT = process.env.VOICE_AI_ENDPOINT;
-console.log('endpoint: ', VOICE_AI_ENDPOINT);
 
 export async function toggleDeepgramConnection(
 	action: 'start' | 'stop',

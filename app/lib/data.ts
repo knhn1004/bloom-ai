@@ -18,7 +18,13 @@ import {
 } from 'lucide-react';
 
 import { db } from '../firebase.config';
-import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import {
+	collection,
+	query,
+	orderBy,
+	limit,
+	onSnapshot,
+} from 'firebase/firestore';
 import type { PlantMetrics } from './interfaces';
 
 export const getSentimentInfo = (sentiment?: string) => {
@@ -80,23 +86,23 @@ export const getSentimentInfo = (sentiment?: string) => {
 	}
 };
 
-export const setupPlantMetricsListener = (callback: (data: PlantMetrics[]) => void) => {
-  const plantMetricsRef = collection(db, 'iot_data');
-  const q = query(plantMetricsRef, orderBy('timestamp', 'desc'), limit(24));
+export const setupPlantMetricsListener = (
+	callback: (data: PlantMetrics[]) => void
+) => {
+	const plantMetricsRef = collection(db, 'iot_data');
+	const q = query(plantMetricsRef, orderBy('timestamp', 'desc'), limit(24));
 
-  return onSnapshot(q, (querySnapshot) => {
-    const data = querySnapshot.docs.map(doc => {
-      const docData = doc.data();
-      console.log('Raw Firestore data:', docData);
-      return {
-        timestamp: docData.timestamp?.toDate().toLocaleString() || 'N/A',
-        soilMoisture: docData.soilMoisture || docData.soil_moisture || 0,
-        temperature: docData.temperature || 0,
-        humidity: docData.humidity || 0,
-        lightIntensity: docData.lightIntensity || docData.light_intensity || 0,
-      };
-    });
-    console.log('Transformed data:', data);
-    callback(data.reverse());
-  });
+	return onSnapshot(q, querySnapshot => {
+		const data = querySnapshot.docs.map(doc => {
+			const docData = doc.data();
+			return {
+				timestamp: docData.timestamp?.toDate().toLocaleString() || 'N/A',
+				soilMoisture: docData.soilMoisture || docData.soil_moisture || 0,
+				temperature: docData.temperature || 0,
+				humidity: docData.humidity || 0,
+				lightIntensity: docData.lightIntensity || docData.light_intensity || 0,
+			};
+		});
+		callback(data.reverse());
+	});
 };

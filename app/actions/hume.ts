@@ -21,8 +21,6 @@ export async function analyzeExpression(imageUrl: string) {
 			urls: [imageUrl],
 		});
 
-		console.log('Running Hume analysis...');
-
 		await job.awaitCompletion();
 
 		const predictions =

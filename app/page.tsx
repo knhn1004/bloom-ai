@@ -83,7 +83,6 @@ export default function Dashboard() {
 			await toggleDeepgramConnection('stop', chatId);
 		} else {
 			const chatId = Math.random().toString(36).substring(2, 15);
-			console.log('chat_id: ', chatId);
 			setChatId(chatId);
 			await toggleDeepgramConnection('start', chatId);
 		}
@@ -193,7 +192,7 @@ export default function Dashboard() {
 											{plantMetrics.length > 0
 												? `${
 														plantMetrics[plantMetrics.length - 1].temperature
-												  }°C`
+												  }°F`
 												: 'N/A'}
 										</p>
 									</div>
