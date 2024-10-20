@@ -6,7 +6,7 @@ from firebase_admin import credentials, firestore
 import os
 from dotenv import load_dotenv
 
-cred = credentials.Certificate("serviceAccountKey.json")
+cred = credentials.Certificate("service_account.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 

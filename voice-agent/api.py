@@ -69,19 +69,19 @@ async def get_temperature():
 async def get_humidity():
     response = requests.get(os.getenv("IOT_ENDPOINT"))
     humidity = response.json()["feeds"][-1]["field1"]
-    return {"humidity": humidity}
+    return {"humidity": f"{humidity}%"}
 
 @app.get("/light_intensity")
 async def get_light_intensity():
     response = requests.get(os.getenv("IOT_ENDPOINT"))
     light_intensity = response.json()["feeds"][-1]["field4"]
-    return {"light_intensity": light_intensity}
+    return {"light_intensity": f"{light_intensity} lux"}
 
 @app.get("/soil_moisture")
 async def get_soil_moisture():
     response = requests.get(os.getenv("IOT_ENDPOINT"))
     soil_moisture = response.json()["feeds"][-1]["field5"]
-    return {"soil_moisture": soil_moisture}
+    return {"soil_moisture": f"{soil_moisture/4000*100}%"}
 
 if __name__ == "__main__":
     import uvicorn

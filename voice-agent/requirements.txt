@@ -4,6 +4,5 @@ janus==1.0.0
 python-dotenv
 fastapi
 uvicorn
-google-cloud-firestore
 firebase_admin
 pyngrok
