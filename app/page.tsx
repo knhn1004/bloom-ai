@@ -19,87 +19,38 @@ import {
 	PhoneCall,
 	PhoneOff,
 } from 'lucide-react';
-import { processUserInput } from './actions/groq-chat';
-import {
-	useDeepgram,
-	LiveTranscriptionEvents,
-	LiveTranscriptionEvent,
-} from './context/DeepgramContextProvider';
-import {
-	useMicrophone,
-	MicrophoneState,
-	MicrophoneEvents,
-} from './context/MicrophoneContextProvider';
+//import { processUserInput } from './actions/groq-chat';
 
 import { getSentimentInfo, plantMetricsData } from './lib/data';
 import type { Message } from './lib/interfaces';
+import { toggleDeepgramConnection } from './actions/deepgram-chat';
+import { db } from './firebase.config';
+import { onSnapshot, collection } from 'firebase/firestore';
 
 export default function Dashboard() {
 	const [messages, setMessages] = useState<Message[]>([]);
 
-	const { connection, connectToDeepgram } = useDeepgram();
-	const {
-		setupMicrophone,
-		microphone,
-		startMicrophone,
-		stopMicrophone,
-		microphoneState,
-	} = useMicrophone();
-
 	const [isListening, setIsListening] = useState(false);
+	const [chatId, setChatId] = useState('');
 
 	const scrollAreaRef = useRef<HTMLDivElement>(null);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
-		if (microphoneState === MicrophoneState.Ready && isListening) {
-			connectToDeepgram({
-				model: 'nova-2',
-				interim_results: true,
-				smart_format: true,
-				filler_words: true,
-				utterance_end_ms: 3000,
+		if (chatId) {
+			const messagesRef = collection(db, 'chats', chatId, 'messages');
+
+			const unsubscribe = onSnapshot(messagesRef, snapshot => {
+				const newMessages = snapshot.docs.map(doc => ({
+					id: doc.id,
+					...(doc.data() as Omit<Message, 'id'>),
+				})) as Message[];
+				setMessages(newMessages);
 			});
+
+			return () => unsubscribe();
 		}
-	}, [microphoneState, connectToDeepgram, isListening]);
-
-	useEffect(() => {
-		if (!microphone || !connection || !isListening) return;
-
-		const onData = async (e: BlobEvent) => {
-			if (e.data.size > 0) {
-				connection.send(e.data);
-			}
-		};
-
-		let lastTranscript = '';
-
-		const onTranscript = async (data: LiveTranscriptionEvent) => {
-			const transcript = data.channel.alternatives[0].transcript;
-			if (transcript !== '' && data.is_final) {
-				console.log('Final transcript:', transcript);
-				if (transcript !== lastTranscript) {
-					await handleUserInput(transcript);
-					lastTranscript = transcript;
-				}
-			}
-		};
-
-		connection.addListener(LiveTranscriptionEvents.Transcript, onTranscript);
-		microphone.addEventListener(MicrophoneEvents.DataAvailable, onData);
-		startMicrophone();
-		console.log('Connection opened and microphone started');
-
-		return () => {
-			connection.removeListener(
-				LiveTranscriptionEvents.Transcript,
-				onTranscript
-			);
-			microphone.removeEventListener(MicrophoneEvents.DataAvailable, onData);
-			stopMicrophone();
-			console.log('Microphone stopped');
-		};
-	}, [connection, microphone, isListening, startMicrophone, stopMicrophone]);
+	}, [chatId]);
 
 	useEffect(() => {
 		// Scroll to the bottom of the chat area when messages change
@@ -113,44 +64,23 @@ export default function Dashboard() {
 		}
 	}, [messages]);
 
-	const handleUserInput = async (input: string) => {
-		setMessages(prev => [...prev, { role: 'user', content: input }]);
-		const aiResponse = await processUserInput(input);
-		setMessages(prev => [...prev, { role: 'ai', ...aiResponse } as Message]);
-	};
-
-	const startConnection = async () => {
-		try {
-			await setupMicrophone();
-			await connectToDeepgram({
-				model: 'nova-2',
-				language: 'en-US',
-				interim_results: true,
-				smart_format: true,
-				filler_words: true,
-				utterance_end_ms: 1000,
-			});
-			setIsListening(true);
-			console.log('Connected to Deepgram');
-		} catch (error) {
-			console.error('Error connecting microphone or services', error);
-		}
-	};
-
-	const stopConnection = () => {
-		setIsListening(false);
-		connection?.finish();
-		stopMicrophone();
-		console.log('Connection finished and microphone stopped');
-	};
-
 	const toggleConnection = async () => {
-		if (!isListening) {
-			await startConnection();
+		if (isListening) {
+			await toggleDeepgramConnection('stop', chatId);
 		} else {
-			stopConnection();
+			const chatId = Math.random().toString(36).substring(2, 15);
+			console.log('chat_id: ', chatId);
+			setChatId(chatId);
+			await toggleDeepgramConnection('start', chatId);
 		}
+		setIsListening(prev => !prev);
 	};
+
+	//const handleUserInput = async (input: string) => {
+	//	setMessages(prev => [...prev, { role: 'user', content: input }]);
+	//	const aiResponse = await processUserInput(input);
+	//	setMessages(prev => [...prev, { role: 'ai', ...aiResponse } as Message]);
+	//};
 
 	return (
 		<div className="container mx-auto p-4 bg-gradient-to-br from-green-50 to-blue-50">
