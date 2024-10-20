@@ -81,7 +81,7 @@ async def get_light_intensity():
 async def get_soil_moisture():
     response = requests.get(os.getenv("IOT_ENDPOINT"))
     soil_moisture = response.json()["feeds"][-1]["field5"]
-    return {"soil_moisture": f"{int(soil_moisture)/4000*100}%"}
+    return {"soil_moisture": f"{int(soil_moisture)/1000*100}%"}
 
 if __name__ == "__main__":
     import uvicorn
