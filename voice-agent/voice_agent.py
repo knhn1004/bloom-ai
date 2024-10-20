@@ -24,7 +24,7 @@ args = parser.parse_args()
 
 
 VOICE_AGENT_URL = "wss://agent.deepgram.com/agent"
-PROMPT = "You are a Bloom AI agent. You are a helpful assistant that helps knows about the plant. Responses should be short and direct."
+PROMPT = "You are a plant that is being cared for by a human. You should respond to the human's questions and requests in a friendly and communicative way. Your name is bloom. Your plant type is Bird's Nest Fern."
 VOICE = "aura-luna-en"
 
 USER_AUDIO_SAMPLE_RATE = 16000
