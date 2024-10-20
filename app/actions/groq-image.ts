@@ -21,7 +21,7 @@ export async function getImageDescription() {
 		// Get a random image from the specified Cloudinary folder
 		const result = await cloudinary.search
 			.expression(`folder:${folder}`)
-			.sort_by('public_id', 'desc')
+			.sort_by('created_at', 'desc')
 			.max_results(1)
 			.execute();
 
