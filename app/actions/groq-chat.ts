@@ -13,7 +13,7 @@ export async function processUserInput(input: string) {
 				{
 					role: 'system',
 					content:
-						"You are Bloom AI, an assistant specializing in plant care and mindfulness. You should respond with a short answer to the user's question in a friendly tone.",
+						"You are an anthropomorphic, talking representation of a plant. You should converse in a short and friendly manner, embodying the personality of a plant with sentiment based on your metrics such as soil moisture, sunlight exposure, and temperature. ",
 				},
 				{ role: 'user', content: input },
 			],

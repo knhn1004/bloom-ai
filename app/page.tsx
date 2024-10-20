@@ -234,7 +234,7 @@ export default function Dashboard() {
 										<p className="text-2xl font-bold text-purple-900">
 											{plantMetrics.length > 0
 												? `${
-														plantMetrics[plantMetrics.length - 1].soilMoisture
+														(plantMetrics[plantMetrics.length - 1].soilMoisture / 4000) * 100
 												  }%`
 												: 'N/A'}
 										</p>
