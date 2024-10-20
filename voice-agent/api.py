@@ -1,5 +1,7 @@
 import subprocess
 import os
+import requests
+import json
 from fastapi import FastAPI, HTTPException, Query
 from dotenv import load_dotenv
 import firebase_admin
@@ -59,23 +61,27 @@ async def stop_voice_agent():
 
 @app.get("/temperature")
 async def get_temperature():
-    # TODO: get temperature from sensor
-    return {"temperature": 72}
+    response = requests.get(os.getenv("IOT_ENDPOINT"))
+    temperature = response.json()["feeds"][-1]["field3"]
+    return {"temperature": f"{temperature}°F"}
 
 @app.get("/humidity")
 async def get_humidity():
-    # TODO: get humidity from sensor
-    return {"humidity": 40}
+    response = requests.get(os.getenv("IOT_ENDPOINT"))
+    humidity = response.json()["feeds"][-1]["field1"]
+    return {"humidity": humidity}
 
 @app.get("/light_intensity")
 async def get_light_intensity():
-    # TODO: get light intensity from sensor
-    return {"light_intensity": 1000}
+    response = requests.get(os.getenv("IOT_ENDPOINT"))
+    light_intensity = response.json()["feeds"][-1]["field4"]
+    return {"light_intensity": light_intensity}
 
 @app.get("/soil_moisture")
 async def get_soil_moisture():
-    # TODO: get soil moisture from sensor
-    return {"soil_moisture": 50}
+    response = requests.get(os.getenv("IOT_ENDPOINT"))
+    soil_moisture = response.json()["feeds"][-1]["field5"]
+    return {"soil_moisture": soil_moisture}
 
 if __name__ == "__main__":
     import uvicorn
