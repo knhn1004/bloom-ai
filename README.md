@@ -1,36 +1,96 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Bloom AI: Smart Plant Monitoring System
+
+![Bloom AI Logo](/public/banner.svg)
+
+Bloom AI is an innovative plant health monitoring system that combines IoT sensors, AI, and data visualization to help you take better care of your plants.
+
+## Features
+
+- **Real-time Plant Monitoring**: Track temperature, humidity, soil moisture, and light levels.
+- **AI-powered Plant Assistant**: Get answers to your plant care questions.
+- **3D Plant Visualization**: View your plant's health status in an interactive 3D model.
+- **Data Analytics**: Visualize trends and patterns in your plant's health data.
+- **Image Analysis**: Upload plant images for AI-powered health assessment.
+
+![Dashboard Screenshot](path/to/dashboard_screenshot.png)
+
+## Technology Stack
+
+- Frontend: Next.js, React, TypeScript
+- Backend: Node.js
+- IoT: Arduino, ESP8266/ESP32
+- APIs: ThingSpeak, Groq, Hume
+- Data Visualization: Recharts
+- 3D Rendering: Three.js
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Node.js (v14 or later)
+- Arduino IDE
+- ThingSpeak account
+- Groq API key
+- Hume API key
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Clone the repository:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   ```
+   git clone https://github.com/your-username/bloom-ai.git
+   ```
 
-## Learn More
+2. Install dependencies:
 
-To learn more about Next.js, take a look at the following resources:
+   ```
+   cd bloom-ai
+   npm install
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. Set up environment variables:
+   Create a `.env` file in the root directory and add the following:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   ```
+   THINGSPEAK_API_KEY=your_thingspeak_api_key
+   GROQ_API_KEY=your_groq_api_key
+   HUME_API_KEY=your_hume_api_key
+   ```
 
-## Deploy on Vercel
+4. Run the development server:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   ```
+   npm run dev
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Hardware Setup
+
+1. Connect the sensors to your Arduino or ESP8266/ESP32 board according to the wiring diagram.
+2. Upload the `main_code.ino` sketch to your board.
+3. Configure your Wi-Fi credentials in the `secrets.h` file.
+
+![Hardware Setup](path/to/hardware_setup.png)
+
+## Usage
+
+1. Place the sensor near your plant.
+2. Access the Bloom AI dashboard through your web browser.
+3. Monitor your plant's health metrics in real-time.
+4. Ask the AI assistant for plant care advice.
+5. Upload images of your plant for detailed analysis.
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for more details.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- ThingSpeak for IoT data platform
+- Groq for AI language model
+- Hume for computer vision analysis
