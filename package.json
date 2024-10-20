@@ -17,6 +17,7 @@
     "@react-three/drei": "^9.114.6",
     "@react-three/fiber": "^8.17.10",
     "class-variance-authority": "^0.7.0",
+    "cloudinary": "^2.5.1",
     "clsx": "^2.1.1",
     "firebase": "^10.14.1",
     "groq-sdk": "^0.7.0",

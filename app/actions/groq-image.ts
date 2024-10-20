@@ -1,25 +1,42 @@
 'use server';
 
 import { Groq } from 'groq-sdk';
+import { v2 as cloudinary } from 'cloudinary';
 
 const groqApiKey = process.env.GROQ_API_KEY;
 
 const groq = new Groq({ apiKey: groqApiKey });
 
-export async function getImageDescription() {
-	const imageUrl = process.env.PLANT_IMAGE_URL;
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-	if (!imageUrl) {
-		throw new Error('PLANT_IMAGE_URL is not set in the environment variables');
-	}
+export async function getImageDescription() {
+	const folder = process.env.CLOUDINARY_FOLDER;
 
 	try {
+		// Get a random image from the specified Cloudinary folder
+		const result = await cloudinary.search
+			.expression(`folder:${folder}`)
+			.sort_by('public_id', 'desc')
+			.max_results(1)
+			.execute();
+
+		if (!result.resources.length) {
+			throw new Error('No images found in the specified folder');
+		}
+
+		const imageUrl = result.resources[0].secure_url;
+
 		const completion = await groq.chat.completions.create({
 			messages: [
 				{
 					role: 'user',
 					content:
-						'You are an expert in plant biology. You are given an image of a plant and you need to describe the plant in detail. You should describe the plant in a way that is easy to understand for a layman. You should describe the plant in a way that is easy to understand for a layman. You should describe the plant in a way that is easy to understand for a layman. You should describe the plant in a way that is easy to understand for a layman. ',
+						'You are an expert in plant biology. You are given an image of a plant and you need to describe the plant in detail. You should describe the plant in a way that is easy to understand for a layman.',
 				},
 				{
 					role: 'user',
@@ -53,7 +70,7 @@ export async function getImageDescription() {
 	} catch (error) {
 		console.error('Error processing request:', error);
 		return {
-			imageUrl,
+			imageUrl: '',
 			description: "I'm sorry, there was an error processing your request.",
 		};
 	}

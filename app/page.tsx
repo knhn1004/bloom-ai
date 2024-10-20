@@ -447,10 +447,11 @@ export default function Dashboard() {
 								<div className="relative w-full h-64 mb-4">
 									{imageDescription && (
 										<Image
-											src={imageDescription?.imageUrl ?? ''}
+											src={imageDescription.imageUrl}
 											alt="Plant Image"
-											layout="fill"
-											objectFit="contain"
+											width={500}
+											height={300}
+											style={{ objectFit: 'contain', width: '100%', height: '100%' }}
 										/>
 									)}
 								</div>
