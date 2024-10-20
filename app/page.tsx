@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, useGLTF, Environment } from '@react-three/drei';
 import {
 	ChartContainer,
 	ChartTooltip,
@@ -18,6 +20,7 @@ import {
 	Sprout,
 	PhoneCall,
 	PhoneOff,
+	Leaf,
 } from 'lucide-react';
 //import { processUserInput } from './actions/groq-chat';
 
@@ -95,16 +98,48 @@ export default function Dashboard() {
 	//	setMessages(prev => [...prev, { role: 'ai', ...aiResponse } as Message]);
 	//};
 
+	function PlantModel() {
+		const { scene } = useGLTF('/models/plant.glb');
+		return (
+			<>
+				<primitive
+					object={scene}
+					scale={[2.5, 2.5, 2.5]}
+					position={[0, -1.5, 0]} // Move the plant down
+				/>
+				<OrbitControls
+					enableZoom={false}
+					enablePan={false}
+					enableRotate={true}
+					minPolarAngle={Math.PI / 2} // Restrict vertical rotation
+					maxPolarAngle={Math.PI / 2} // Restrict vertical rotation
+				/>
+				<Environment preset="sunset" background />
+				<ambientLight intensity={0.5} />
+				<spotLight
+					position={[10, 10, 10]}
+					angle={0.15}
+					penumbra={1}
+					intensity={1}
+					castShadow
+				/>
+			</>
+		);
+	}
+
 	return (
 		<div className="container mx-auto p-4 bg-gradient-to-br from-green-50 to-blue-50">
-			<h1 className="text-4xl font-bold mb-6 text-gray-900">Bloom AI</h1>
+			<h1 className="text-4xl font-bold mb-6 text-gray-900 flex items-center">
+				<Leaf className="w-8 h-8 mr-2" />
+				Bloom AI
+			</h1>
 
 			<div className="grid grid-cols-1 gap-6">
-				{/* Voice AI Agent Section */}
+				{/* Voice AI Agent and 3D Model Section */}
 				<Card className="rounded-2xl shadow-lg overflow-hidden">
 					<CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
 						<CardTitle className="text-xl sm:text-2xl">
-							Bloom AI Voice Assistant
+							Bloom AI Assistant
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="p-4 sm:p-6">
@@ -176,6 +211,20 @@ export default function Dashboard() {
 					</CardContent>
 				</Card>
 
+				{/* 3D Model Section */}
+				<Card className="col-span-1 md:col-span-2 rounded-2xl shadow-lg">
+					<CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
+						<CardTitle className="text-2xl">3D Plant Model</CardTitle>
+					</CardHeader>
+					<CardContent className="p-6">
+						<div className="h-[300px] sm:h-[400px] w-full">
+							<Canvas camera={{ position: [0, 0, 7], fov: 75 }}>
+								<PlantModel />
+							</Canvas>
+						</div>
+					</CardContent>
+				</Card>
+
 				{/* Plant Metrics Section */}
 				<Card className="col-span-1 md:col-span-2 rounded-2xl shadow-lg">
 					<CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
@@ -215,7 +264,7 @@ export default function Dashboard() {
 								<CardContent className="p-4 flex items-center">
 									<Sun className="w-8 h-8 text-yellow-500 mr-2" />
 									<div>
-										<p className="text-sm text-yellow-700">Light Intensity</p>
+										<p className="text-sm text-yellow-700">Intensity</p>
 										<p className="text-2xl font-bold text-yellow-900">
 											{plantMetrics.length > 0
 												? `${
@@ -234,7 +283,10 @@ export default function Dashboard() {
 										<p className="text-2xl font-bold text-purple-900">
 											{plantMetrics.length > 0
 												? `${
-														(plantMetrics[plantMetrics.length - 1].soilMoisture / 4000) * 100
+														(plantMetrics[plantMetrics.length - 1]
+															.soilMoisture /
+															4000) *
+														100
 												  }%`
 												: 'N/A'}
 										</p>
@@ -261,13 +313,13 @@ export default function Dashboard() {
 									value="lightIntensity"
 									className="data-[state=active]:bg-green-500 data-[state=active]:text-white"
 								>
-									Light Intensity
+									Intensity
 								</TabsTrigger>
 								<TabsTrigger
 									value="soilMoisture"
 									className="data-[state=active]:bg-green-500 data-[state=active]:text-white"
 								>
-									Soil Moisture
+									Moisture
 								</TabsTrigger>
 							</TabsList>
 							{[
