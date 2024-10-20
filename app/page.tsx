@@ -21,9 +21,7 @@ import {
 	Sprout,
 	PhoneCall,
 	PhoneOff,
-	Leaf,
 } from 'lucide-react';
-//import { processUserInput } from './actions/groq-chat';
 
 import { getSentimentInfo, setupPlantMetricsListener } from './lib/data';
 import type { Message, PlantMetrics } from './lib/interfaces';
@@ -145,13 +143,12 @@ export default function Dashboard() {
 	return (
 		<div className="container mx-auto p-4 bg-gradient-to-br from-green-50 to-blue-50">
 			<h1 className="text-4xl font-bold mb-6 text-gray-900 flex items-center">
-				<Leaf className="w-8 h-8 mr-2" />
-				Bloom AI
+				🪴 Bloom AI
 			</h1>
 
-			<div className="grid grid-cols-1 gap-6">
-				{/* Voice AI Agent and 3D Model Section */}
-				<Card className="rounded-2xl shadow-lg overflow-hidden">
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+				{/* Voice AI Agent Section */}
+				<Card className="rounded-t-2xl shadow-lg overflow-hidden">
 					<CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
 						<CardTitle className="text-xl sm:text-2xl">
 							Bloom AI Assistant
@@ -227,7 +224,7 @@ export default function Dashboard() {
 				</Card>
 
 				{/* 3D Model Section */}
-				<Card className="col-span-1 md:col-span-2 rounded-2xl shadow-lg">
+				<Card className="rounded-t-2xl shadow-lg">
 					<CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
 						<CardTitle className="text-2xl">3D Plant Model</CardTitle>
 					</CardHeader>
@@ -241,7 +238,7 @@ export default function Dashboard() {
 				</Card>
 
 				{/* Plant Metrics Section */}
-				<Card className="col-span-1 md:col-span-2 rounded-2xl shadow-lg">
+				<Card className="col-span-1 md:col-span-2 rounded-t-2xl shadow-lg mt-6">
 					<CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
 						<CardTitle className="text-2xl">Plant Metrics</CardTitle>
 					</CardHeader>
@@ -379,7 +376,7 @@ export default function Dashboard() {
 				</Card>
 
 				{/* Image Description Section */}
-				<Card className="col-span-1 md:col-span-2 rounded-2xl shadow-lg mt-6">
+				<Card className="col-span-1 md:col-span-2 rounded-t-2xl shadow-lg mt-6">
 					<CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white flex justify-between items-center">
 						<CardTitle className="text-2xl">Plant Image Analysis</CardTitle>
 						<Button
