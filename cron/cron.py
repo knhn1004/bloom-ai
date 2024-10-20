@@ -4,10 +4,13 @@ from datetime import datetime
 import firebase_admin
 from firebase_admin import credentials, firestore
 import os
+from dotenv import load_dotenv
 
 cred = credentials.Certificate("serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
+
+load_dotenv()
 
 THINKSPEAK_URL = os.getenv("IOT_ENDPOINT")
 
@@ -40,10 +43,10 @@ def update_firestore(data):
                 timestamp = datetime.strptime(feed['created_at'], "%Y-%m-%dT%H:%M:%SZ")
                 doc_data = {
                     'timestamp': timestamp,
-                    'temperature': parse_float(feed['field1']),
-                    'humidity': parse_float(feed['field2']),
-                    'light_intensity': parse_float(feed['field3']),
-                    'soil_moisture': parse_int(feed['field4'])
+                    'temperature': parse_float(feed['field3']),
+                    'humidity': parse_float(feed['field1']),
+                    'light_intensity': parse_float(feed['field4']),
+                    'soil_moisture': parse_int(feed['field5'])
                 }
                 doc_ref.set(doc_data)
                 print(f"Updated Firestore with entry_id: {feed['entry_id']}")
@@ -74,7 +77,7 @@ def main():
         data = fetch_data()
         if data:
             update_firestore(data)
-        time.sleep(15)
+        time.sleep(60)
 
 if __name__ == "__main__":
     main()

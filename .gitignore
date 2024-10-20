@@ -29,6 +29,7 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env
 
 # vercel
 .vercel
@@ -41,3 +42,5 @@ next-env.d.ts
 
 cron/*
 !cron/cron.py
+
+.venv
