@@ -8,6 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Environment } from '@react-three/drei';
+import Markdown from 'react-markdown';
 import {
 	ChartContainer,
 	ChartTooltip,
@@ -29,6 +30,8 @@ import type { Message, PlantMetrics } from './lib/interfaces';
 import { toggleDeepgramConnection } from './actions/deepgram-chat';
 import { db } from './firebase.config';
 import { onSnapshot, collection, orderBy, query } from 'firebase/firestore';
+import { getImageDescription } from './actions/groq-image';
+import Image from 'next/image';
 
 export default function Dashboard() {
 	const [messages, setMessages] = useState<Message[]>([]);
@@ -39,6 +42,11 @@ export default function Dashboard() {
 	const [plantMetrics, setPlantMetrics] = useState<PlantMetrics[]>([]);
 	const scrollAreaRef = useRef<HTMLDivElement>(null);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
+	const [imageDescription, setImageDescription] = useState<{
+		imageUrl: string;
+		description: string;
+	} | null>(null);
+	const [isAnalyzing, setIsAnalyzing] = useState(false);
 
 	useEffect(() => {
 		if (chatId) {
@@ -97,6 +105,13 @@ export default function Dashboard() {
 	//	const aiResponse = await processUserInput(input);
 	//	setMessages(prev => [...prev, { role: 'ai', ...aiResponse } as Message]);
 	//};
+
+	const handleGetImageDescription = async () => {
+		setIsAnalyzing(true);
+		const result = await getImageDescription();
+		setImageDescription(result);
+		setIsAnalyzing(false);
+	};
 
 	function PlantModel() {
 		const { scene } = useGLTF('/models/plant.glb');
@@ -360,6 +375,88 @@ export default function Dashboard() {
 								</TabsContent>
 							))}
 						</Tabs>
+					</CardContent>
+				</Card>
+
+				{/* Image Description Section */}
+				<Card className="col-span-1 md:col-span-2 rounded-2xl shadow-lg mt-6">
+					<CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white flex justify-between items-center">
+						<CardTitle className="text-2xl">Plant Image Analysis</CardTitle>
+						<Button
+							onClick={handleGetImageDescription}
+							variant="secondary"
+							size="sm"
+							className="bg-white text-green-500 hover:bg-green-100"
+							disabled={isAnalyzing}
+						>
+							{isAnalyzing ? (
+								<>
+									<span className="mr-2">Analyzing...</span>
+									<svg
+										className="animate-spin h-4 w-4 text-green-500"
+										xmlns="http://www.w3.org/2000/svg"
+										fill="none"
+										viewBox="0 0 24 24"
+									>
+										<circle
+											className="opacity-25"
+											cx="12"
+											cy="12"
+											r="10"
+											stroke="currentColor"
+											strokeWidth="4"
+										></circle>
+										<path
+											className="opacity-75"
+											fill="currentColor"
+											d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+										></path>
+									</svg>
+								</>
+							) : (
+								'Analyze'
+							)}
+						</Button>
+					</CardHeader>
+					<CardContent className="p-6">
+						{isAnalyzing ? (
+							<div className="flex items-center justify-center h-64">
+								<svg
+									className="animate-spin h-10 w-10 text-green-500"
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+								>
+									<circle
+										className="opacity-25"
+										cx="12"
+										cy="12"
+										r="10"
+										stroke="currentColor"
+										strokeWidth="4"
+									></circle>
+									<path
+										className="opacity-75"
+										fill="currentColor"
+										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+									></path>
+								</svg>
+							</div>
+						) : (
+							<>
+								<div className="relative w-full h-64 mb-4">
+									{imageDescription && (
+										<Image
+											src={imageDescription?.imageUrl ?? ''}
+											alt="Plant Image"
+											layout="fill"
+											objectFit="contain"
+										/>
+									)}
+								</div>
+								<Markdown>{imageDescription?.description}</Markdown>
+							</>
+						)}
 					</CardContent>
 				</Card>
 			</div>
