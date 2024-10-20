@@ -17,9 +17,9 @@ Bloom AI is an innovative plant health monitoring system that combines IoT senso
 ## Technology Stack
 
 - Frontend: Next.js, React, TypeScript
-- Backend: Node.js, Flask, ThingSpeak 
+- Backend: Node.js, FastAPI, ThingSpeak 
 - IoT: Arduino, ESP8266/ESP32
-- APIs: ThingSpeak, Groq, Hume
+- APIs: ThingSpeak, Groq, Deepgram
 - Data Visualization: Recharts
 - 3D Rendering: Three.js
 
@@ -94,5 +94,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgments
 
 - ThingSpeak for IoT data platform
-- Groq for AI language model
-- Hume for computer vision analysis
+- Groq for AI language model and computer vision analysis
+- Deepgram for Voice AI 
