@@ -77,7 +77,7 @@ def main():
         data = fetch_data()
         if data:
             update_firestore(data)
-        time.sleep(60)
+        time.sleep(15)
 
 if __name__ == "__main__":
     main()

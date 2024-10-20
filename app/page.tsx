@@ -300,7 +300,7 @@ export default function Dashboard() {
 												? `${
 														(plantMetrics[plantMetrics.length - 1]
 															.soilMoisture /
-															4000) *
+															1000) *
 														100
 												  }%`
 												: 'N/A'}

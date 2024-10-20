@@ -97,10 +97,10 @@ export const setupPlantMetricsListener = (
 			const docData = doc.data();
 			return {
 				timestamp: docData.timestamp?.toDate().toLocaleString() || 'N/A',
-				soilMoisture: docData.soilMoisture || docData.soil_moisture || 0,
+				soilMoisture: docData.soil_moisture || 0,
 				temperature: docData.temperature || 0,
 				humidity: docData.humidity || 0,
-				lightIntensity: docData.lightIntensity || docData.light_intensity || 0,
+				lightIntensity: docData.light_intensity * 10 || 0,
 			};
 		});
 		callback(data.reverse());
