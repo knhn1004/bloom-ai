@@ -23,7 +23,7 @@ CAPTURE_FOLDER = 'static/captures'
 os.makedirs(CAPTURE_FOLDER, exist_ok=True)
 
 def upload_to_cdn(image_path):
-    result = cloudinary.uploader.upload(image_path)
+    result = cloudinary.uploader.upload(image_path, folder=cloudinaryFolder)
     return result.get("url")
 
 @app.route('/')
