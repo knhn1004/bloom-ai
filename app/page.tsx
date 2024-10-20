@@ -297,12 +297,12 @@ export default function Dashboard() {
 										<p className="text-sm text-purple-700">Soil Moisture</p>
 										<p className="text-2xl font-bold text-purple-900">
 											{plantMetrics.length > 0
-												? `${
+												? `${(
 														(plantMetrics[plantMetrics.length - 1]
 															.soilMoisture /
 															1000) *
 														100
-												  }%`
+												  ).toFixed(2)}%`
 												: 'N/A'}
 										</p>
 									</div>
