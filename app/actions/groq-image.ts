@@ -26,7 +26,7 @@ export async function getImageDescription() {
 					content: [
 						{
 							type: 'text',
-							text: `Describe the plant condition in the image completely. Include the plant's age, health, and any other relevant details.
+							text: `Describe the plant condition in the image completely. Include the plant's condition analysis, scientific classification, health status, growth indicators, environment factors, lightning and temperature conditions, and any other relevant details.
 							Make your response concise and to the point.`,
 						},
 						{
