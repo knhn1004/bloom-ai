@@ -23,7 +23,7 @@ args = parser.parse_args()
 
 
 VOICE_AGENT_URL = "wss://agent.deepgram.com/agent"
-PROMPT = "You are a helpful assistant. Responses should be short and direct."
+PROMPT = "You are a Bloom AI agent. You are a helpful assistant that helps knows about the plant. Responses should be short and direct."
 VOICE = "aura-asteria-en"
 
 USER_AUDIO_SAMPLE_RATE = 16000
@@ -48,9 +48,14 @@ SETTINGS = {
     },
     "agent": {
         "listen": {"model": "nova-2"},
+        #"think": {
+        #    "provider": {"type": "open_ai"},
+        #    "model": "gpt-4o-mini",
+        #    "instructions": PROMPT,
+        #},
         "think": {
-            "provider": {"type": "open_ai"},
-            "model": "gpt-4o-mini",
+            "provider": {"type": "groq"},
+            "model": "llama3-70b-8192",
             "instructions": PROMPT,
         },
         "speak": {"model": VOICE},

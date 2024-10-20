@@ -25,7 +25,7 @@ import { getSentimentInfo, setupPlantMetricsListener } from './lib/data';
 import type { Message, PlantMetrics } from './lib/interfaces';
 import { toggleDeepgramConnection } from './actions/deepgram-chat';
 import { db } from './firebase.config';
-import { onSnapshot, collection } from 'firebase/firestore';
+import { onSnapshot, collection, orderBy, query } from 'firebase/firestore';
 
 export default function Dashboard() {
 	const [messages, setMessages] = useState<Message[]>([]);
@@ -40,8 +40,9 @@ export default function Dashboard() {
 	useEffect(() => {
 		if (chatId) {
 			const messagesRef = collection(db, 'chats', chatId, 'messages');
+			const q = query(messagesRef, orderBy('timestamp', 'asc'));
 
-			const unsubscribe = onSnapshot(messagesRef, snapshot => {
+			const unsubscribe = onSnapshot(q, snapshot => {
 				const newMessages = snapshot.docs.map(doc => ({
 					id: doc.id,
 					...(doc.data() as Omit<Message, 'id'>),
@@ -66,16 +67,16 @@ export default function Dashboard() {
 	}, [messages]);
 
 	useEffect(() => {
-		const unsubscribe = setupPlantMetricsListener((data) => {
-		  setPlantMetrics(data);
+		const unsubscribe = setupPlantMetricsListener(data => {
+			setPlantMetrics(data);
 		});
-	  
+
 		return () => {
-		  if (unsubscribe) {
-			unsubscribe();
-		  }
+			if (unsubscribe) {
+				unsubscribe();
+			}
 		};
-	  }, []);	
+	}, []);
 
 	const toggleConnection = async () => {
 		if (isListening) {
@@ -189,7 +190,11 @@ export default function Dashboard() {
 									<div>
 										<p className="text-sm text-blue-700">Temperature</p>
 										<p className="text-2xl font-bold text-blue-900">
-											{plantMetrics.length > 0 ? `${plantMetrics[plantMetrics.length - 1].temperature}°C` : 'N/A'}
+											{plantMetrics.length > 0
+												? `${
+														plantMetrics[plantMetrics.length - 1].temperature
+												  }°C`
+												: 'N/A'}
 										</p>
 									</div>
 								</CardContent>
@@ -200,7 +205,9 @@ export default function Dashboard() {
 									<div>
 										<p className="text-sm text-green-700">Humidity</p>
 										<p className="text-2xl font-bold text-green-900">
-											{plantMetrics.length > 0 ? `${plantMetrics[plantMetrics.length - 1].humidity}%` : 'N/A'}
+											{plantMetrics.length > 0
+												? `${plantMetrics[plantMetrics.length - 1].humidity}%`
+												: 'N/A'}
 										</p>
 									</div>
 								</CardContent>
@@ -211,7 +218,11 @@ export default function Dashboard() {
 									<div>
 										<p className="text-sm text-yellow-700">Light Intensity</p>
 										<p className="text-2xl font-bold text-yellow-900">
-											{plantMetrics.length > 0 ? `${plantMetrics[plantMetrics.length - 1].lightIntensity} lux` : 'N/A'}
+											{plantMetrics.length > 0
+												? `${
+														plantMetrics[plantMetrics.length - 1].lightIntensity
+												  } lux`
+												: 'N/A'}
 										</p>
 									</div>
 								</CardContent>
@@ -222,7 +233,11 @@ export default function Dashboard() {
 									<div>
 										<p className="text-sm text-purple-700">Soil Moisture</p>
 										<p className="text-2xl font-bold text-purple-900">
-											{plantMetrics.length > 0 ? `${plantMetrics[plantMetrics.length - 1].soilMoisture}%` : 'N/A'}
+											{plantMetrics.length > 0
+												? `${
+														plantMetrics[plantMetrics.length - 1].soilMoisture
+												  }%`
+												: 'N/A'}
 										</p>
 									</div>
 								</CardContent>
@@ -255,7 +270,12 @@ export default function Dashboard() {
 									Light Intensity
 								</TabsTrigger>
 							</TabsList>
-							{['soilMoisture', 'temperature', 'humidity', 'lightIntensity'].map(metric => (
+							{[
+								'soilMoisture',
+								'temperature',
+								'humidity',
+								'lightIntensity',
+							].map(metric => (
 								<TabsContent key={metric} value={metric}>
 									<Card className="rounded-xl">
 										<CardContent className="p-0">
