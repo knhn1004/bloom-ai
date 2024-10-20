@@ -17,7 +17,7 @@ Bloom AI is an innovative plant health monitoring system that combines IoT senso
 ## Technology Stack
 
 - Frontend: Next.js, React, TypeScript
-- Backend: Node.js
+- Backend: Node.js, Flask, ThingSpeak 
 - IoT: Arduino, ESP8266/ESP32
 - APIs: ThingSpeak, Groq, Hume
 - Data Visualization: Recharts
@@ -71,7 +71,9 @@ Bloom AI is an innovative plant health monitoring system that combines IoT senso
 2. Upload the `main_code.ino` sketch to your board.
 3. Configure your Wi-Fi credentials in the `secrets.h` file.
 
-![Hardware Setup](path/to/hardware_setup.png)
+![Hardware Setup](https://github.com/user-attachments/assets/ecc061ae-c0c7-4216-9fc4-62b835601bba)
+![IMG_0576](https://github.com/user-attachments/assets/c8f88efd-d941-45bc-baab-8545c19462a6)
+![IMG_0575](https://github.com/user-attachments/assets/a8ba4115-1bc9-453b-bafc-22afe9abf57e)
 
 ## Usage
 
